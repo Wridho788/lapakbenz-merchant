@@ -20,6 +20,11 @@ export const API_ENDPOINTS = {
   SEARCH_PRODUCTS: 'product/search',
   PRODUCT_CATEGORIES: 'product/category',
   PRODUCT_CITY: 'product/city_product',
+
+  // province, city, district endpoints
+  PROVINCES: 'city/get_province_rj',
+  CITIES: 'city/get_city_rj/', // /:provinceId
+  DISTRICTS: 'city/get_district_rj/', // /:cityId
 } as const;
 
-export const TOKEN_KEY = 'lapakbenz_supplier_token';
+export const TOKEN_KEY = '';

@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { API_BASE_URL, TOKEN_KEY } from './constants';
-
+import { API_BASE_URL } from './constants';
+import { useAuthStore } from './../store/auth.store';
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -14,7 +14,7 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor - add token to headers
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = useAuthStore.getState().token;
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       // Token expired or invalid
-      localStorage.removeItem(TOKEN_KEY);
+      useAuthStore.getState().logout();
       
       // Only redirect if not already on login page
       if (window.location.pathname !== '/login') {
