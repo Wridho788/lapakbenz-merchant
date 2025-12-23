@@ -9,6 +9,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 // Lazy load pages for code splitting and performance optimization
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const VerificationPage = lazy(() => import('./pages/VerificationPage').then(m => ({ default: m.VerificationPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const ProductsPage = lazy(() => import('./pages/ProductsPage').then(m => ({ default: m.ProductsPage })));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
@@ -49,6 +50,14 @@ function AppContent() {
           element={
             <GuestRoute>
               <RegisterPage />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/verification"
+          element={
+            <GuestRoute>
+              <VerificationPage />
             </GuestRoute>
           }
         />

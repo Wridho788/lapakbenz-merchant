@@ -2,11 +2,19 @@ import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRegister } from '../hooks/useAuth';
-import { provinces, cities, districts } from '../data/locations';
+import { useProvinceList, useCityListByProvince, useDistrictListByCity } from '../hooks/useLocation';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
   const registerMutation = useRegister();
+
+  // Get location data from hooks
+  const { data: provincesData, isLoading: provincesLoading } = useProvinceList();
+  const [selectedProvinceId, setSelectedProvinceId] = useState('');
+  const [selectedCityId, setSelectedCityId] = useState('');
+
+  const { data: citiesData, isLoading: citiesLoading } = useCityListByProvince(selectedProvinceId);
+  const { data: districtsData, isLoading: districtsLoading } = useDistrictListByCity(selectedCityId);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -37,9 +45,16 @@ export const RegisterPage = () => {
     // Reset dependent fields when province or city changes
     if (name === 'shipping_province') {
       setFormData(prev => ({ ...prev, shipping_city: '', shipping_district: '' }));
+      // Extract province ID from value (format: "id|name")
+      const provinceId = value.split('|')[0];
+      setSelectedProvinceId(provinceId);
+      setSelectedCityId('');
     }
     if (name === 'shipping_city') {
       setFormData(prev => ({ ...prev, shipping_district: '' }));
+      // Extract city ID from value (format: "id|name")
+      const cityId = value.split('|')[0];
+      setSelectedCityId(cityId);
     }
   };
 
@@ -53,17 +68,26 @@ export const RegisterPage = () => {
 
     try {
       const result = await registerMutation.mutateAsync(formData);
-      if (result.success) {
-        alert('Registration successful! Please login with your credentials.');
-        navigate('/login');
+      // Check if registration was successful
+      if (result && result.content) {
+        // Navigate to verification page with phone number and user ID
+        navigate('/verification', {
+          state: {
+            phone: formData.phone1,
+            userId: result.content.userid || result.content.id,
+          },
+          replace: true,
+        });
       }
     } catch (error: any) {
       console.error('Registration failed:', error);
     }
   };
 
-  const availableCities = formData.shipping_province ? cities[formData.shipping_province] || [] : [];
-  const availableDistricts = formData.shipping_city ? districts[formData.shipping_city] || [] : [];
+  // Get available locations
+  const provinces = provincesData?.content || [];
+  const cities = citiesData?.content || [];
+  const districts = districtsData?.content || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-white to-accent/10 py-12 px-4 sm:px-6 lg:px-8">
@@ -196,11 +220,13 @@ export const RegisterPage = () => {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all"
-                    disabled={registerMutation.isPending}
+                    disabled={registerMutation.isPending || provincesLoading}
                   >
                     <option value="">Select Province</option>
-                    {provinces.map(prov => (
-                      <option key={prov.value} value={prov.value}>{prov.label}</option>
+                    {provinces.map((prov: any) => (
+                      <option key={prov.id} value={`${prov.id}|${prov.name}`}>
+                        {prov.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -215,12 +241,14 @@ export const RegisterPage = () => {
                     value={formData.shipping_city}
                     onChange={handleChange}
                     required
-                    disabled={!formData.shipping_province || registerMutation.isPending}
+                    disabled={!formData.shipping_province || registerMutation.isPending || citiesLoading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all disabled:bg-gray-100"
                   >
                     <option value="">Select City</option>
-                    {availableCities.map(city => (
-                      <option key={city.value} value={city.value}>{city.label}</option>
+                    {cities.map((city: any) => (
+                      <option key={city.id} value={`${city.id}|${city.name}`}>
+                        {city.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -235,12 +263,14 @@ export const RegisterPage = () => {
                     value={formData.shipping_district}
                     onChange={handleChange}
                     required
-                    disabled={!formData.shipping_city || registerMutation.isPending}
+                    disabled={!formData.shipping_city || registerMutation.isPending || districtsLoading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all disabled:bg-gray-100"
                   >
                     <option value="">Select District</option>
-                    {availableDistricts.map(dist => (
-                      <option key={dist.value} value={dist.value}>{dist.label}</option>
+                    {districts.map((dist: any) => (
+                      <option key={dist.id} value={`${dist.id}|${dist.name}`}>
+                        {dist.name}
+                      </option>
                     ))}
                   </select>
                 </div>

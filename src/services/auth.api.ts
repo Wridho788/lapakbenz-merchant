@@ -66,7 +66,7 @@ export const authApi = {
 
   // Verify OTP
   verifyOtp: async (params: VerifyOtpParams): Promise<AuthResponse> => {
-    const url = `${API_ENDPOINTS.VERIFY_OTP}/${params.userId}/${params.otpCode}`;
+    const url = `${API_ENDPOINTS.VERIFY_OTP}/${params.userid}/${params.otp}`;
     const response = await apiClient.get<AuthResponse>(url);
     return response.data;
   },

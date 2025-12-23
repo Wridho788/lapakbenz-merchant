@@ -30,7 +30,7 @@ export interface ForgotPasswordData {
 }
 
 export interface RequestOtpData {
-  email: string;
+  phone: string;
 }
 
 export interface ChangePasswordData {
@@ -39,8 +39,8 @@ export interface ChangePasswordData {
 }
 
 export interface VerifyOtpParams {
-  userId: string;
-  otpCode: string;
+  userid: string;
+  otp: string;
 }
 
 export interface AuthResponse {
