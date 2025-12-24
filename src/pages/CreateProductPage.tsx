@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useCreateProduct } from '../hooks/useProduct';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ErrorAlert } from '../components/ErrorState';
@@ -33,7 +34,7 @@ export const CreateProductPage = () => {
     try {
       const result = await createProductMutation.mutateAsync(formData);
       if (result.success) {
-        alert('Product created successfully!');
+        toast.success('Produk berhasil dibuat!');
         navigate('/products');
       }
     } catch (error) {
@@ -52,24 +53,24 @@ export const CreateProductPage = () => {
           <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Products
+          Kembali ke Produk
         </button>
 
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Product</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Buat Produk Baru</h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {createProductMutation.isError && showError && (
                 <ErrorAlert
-                  message={createProductMutation.error?.message || 'Failed to create product. Please try again.'}
+                  message={createProductMutation.error?.message || 'Gagal membuat produk. Silakan coba lagi.'}
                   onDismiss={() => setShowError(false)}
                 />
               )}
 
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Name *
+                  Nama Produk *
                 </label>
                 <input
                   id="name"
@@ -85,7 +86,7 @@ export const CreateProductPage = () => {
 
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
+                  Deskripsi *
                 </label>
                 <textarea
                   id="description"
@@ -102,7 +103,7 @@ export const CreateProductPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                    Price (Rp) *
+                    Harga (Rp) *
                   </label>
                   <input
                     id="price"
@@ -119,7 +120,7 @@ export const CreateProductPage = () => {
 
                 <div>
                   <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-2">
-                    Stock *
+                    Stok *
                   </label>
                   <input
                     id="stock"
@@ -137,7 +138,7 @@ export const CreateProductPage = () => {
 
               <div>
                 <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                  Category (Optional)
+                  Kategori (Opsional)
                 </label>
                 <input
                   id="category"
@@ -163,10 +164,10 @@ export const CreateProductPage = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Creating...
+                      Membuat...
                     </span>
                   ) : (
-                    'Create Product'
+                    'Buat Produk'
                   )}
                 </button>
                 <button
@@ -175,7 +176,7 @@ export const CreateProductPage = () => {
                   className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                   style={{ minHeight: '44px' }}
                 >
-                  Cancel
+                  Batal
                 </button>
               </div>
             </form>

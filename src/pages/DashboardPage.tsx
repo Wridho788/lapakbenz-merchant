@@ -3,10 +3,10 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 export const DashboardPage = () => {
 
   const stats = [
-    { label: 'Total Products', value: '0', color: 'blue' },
-    { label: 'Active Products', value: '0', color: 'green' },
-    { label: 'Low Stock', value: '0', color: 'orange' },
-    { label: 'Orders Today', value: '0', color: 'purple' },
+    { label: 'Total Produk', value: '0', color: 'blue' },
+    { label: 'Produk Aktif', value: '0', color: 'green' },
+    { label: 'Stok Rendah', value: '0', color: 'orange' },
+    { label: 'Pesanan Hari Ini', value: '0', color: 'purple' },
   ];
 
   return (
@@ -14,8 +14,8 @@ export const DashboardPage = () => {
       <div className="p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here's your business overview.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Dasbor</h1>
+          <p className="text-gray-600 mt-1">Selamat datang kembali! Berikut ringkasan bisnis Anda.</p>
         </div>
 
         {/* Stats Grid */}
@@ -31,12 +31,12 @@ export const DashboardPage = () => {
        
         {/* Recent Activity Placeholder */}
         <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Aktivitas Terkini</h2>
           <div className="text-center py-8 text-gray-500">
             <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p>No recent activity to display</p>
+            <p>Tidak ada aktivitas terkini untuk ditampilkan</p>
           </div>
         </div>
       </div>

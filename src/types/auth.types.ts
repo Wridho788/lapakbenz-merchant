@@ -30,7 +30,7 @@ export interface ForgotPasswordData {
 }
 
 export interface RequestOtpData {
-  phone: string;
+  username: string;
 }
 
 export interface ChangePasswordData {

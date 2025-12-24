@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
 import { useInitAuth } from './hooks/useInitAuth';
 import { ProtectedRoute, GuestRoute } from './components/RouteGuards';
 import { PageLoader } from './components/Loading';
@@ -110,6 +111,32 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AppContent />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#333',
+                color: '#fff',
+                padding: '16px',
+                borderRadius: '8px',
+              },
+              success: {
+                duration: 5000,
+                iconTheme: {
+                  primary: '#10b981',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                duration: 4000,
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
         </BrowserRouter>
       </QueryClientProvider>
     </ErrorBoundary>

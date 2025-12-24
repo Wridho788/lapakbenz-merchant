@@ -382,9 +382,9 @@ export const ProductsPage = () => {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Products</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Produk Saya</h1>
               <p className="text-gray-600 mt-1">
-                Manage and monitor your product inventory
+                Kelola dan pantau inventaris produk Anda
               </p>
             </div>
             <button
@@ -405,7 +405,7 @@ export const ProductsPage = () => {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              Add New Product
+              Tambah Produk Baru
             </button>
           </div>
         </div>

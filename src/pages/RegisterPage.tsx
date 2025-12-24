@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useRegister } from '../hooks/useAuth';
 import { useProvinceList, useCityListByProvince, useDistrictListByCity } from '../hooks/useLocation';
 
@@ -62,7 +63,7 @@ export const RegisterPage = () => {
     e.preventDefault();
 
     if (!agreeTerms) {
-      alert('Please agree to the terms and conditions');
+      toast.error('Mohon setujui syarat dan ketentuan');
       return;
     }
 
@@ -97,8 +98,8 @@ export const RegisterPage = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-accent rounded-xl mb-4 shadow-accent p-3">
             <img src="/lapakbenz.png" alt="LapakBenz Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-primary">Create Supplier Account</h1>
-          <p className="text-gray-600 mt-2">Register to manage your products on LapakBenz</p>
+          <h1 className="text-3xl font-bold text-primary">Buat Akun Supplier</h1>
+          <p className="text-gray-600 mt-2">Daftar untuk mengelola produk Anda di LapakBenz</p>
         </div>
 
         {/* Form Card */}
@@ -111,18 +112,18 @@ export const RegisterPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-sm font-medium text-red-800">
-                  {registerMutation.error?.message || 'Registration failed. Please try again.'}
+                  {registerMutation.error?.message || 'Pendaftaran gagal. Silakan coba lagi.'}
                 </p>
               </div>
             )}
 
             {/* Company Information Section */}
             <div className="border-b border-gray-200 pb-6">
-              <h2 className="text-lg font-semibold text-primary mb-4">Company Information</h2>
+              <h2 className="text-lg font-semibold text-primary mb-4">Informasi Perusahaan</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Name *
+                    Nama Perusahaan *
                   </label>
                   <input
                     id="name"
@@ -138,7 +139,7 @@ export const RegisterPage = () => {
 
                 <div>
                   <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
-                    Business Type *
+                    Jenis Usaha *
                   </label>
                   <select
                     id="type"
@@ -149,14 +150,14 @@ export const RegisterPage = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                     disabled={registerMutation.isPending}
                   >
-                    <option value="company">Company</option>
-                    <option value="individual">Individual</option>
+                    <option value="company">Perusahaan</option>
+                    <option value="individual">Perorangan</option>
                   </select>
                 </div>
 
                 <div>
                   <label htmlFor="cp" className="block text-sm font-medium text-gray-700 mb-2">
-                    Contact Person *
+                    Nama Kontak *
                   </label>
                   <input
                     id="cp"
@@ -191,11 +192,11 @@ export const RegisterPage = () => {
 
             {/* Shipping Address Section */}
             <div className="border-b border-gray-200 pb-6">
-              <h2 className="text-lg font-semibold text-primary mb-4">Shipping Address</h2>
+              <h2 className="text-lg font-semibold text-primary mb-4">Alamat Pengiriman</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                    Street Address *
+                    Alamat Lengkap *
                   </label>
                   <textarea
                     id="address"
@@ -211,7 +212,7 @@ export const RegisterPage = () => {
 
                 <div>
                   <label htmlFor="shipping_province" className="block text-sm font-medium text-gray-700 mb-2">
-                    Province *
+                    Provinsi *
                   </label>
                   <select
                     id="shipping_province"
@@ -222,7 +223,7 @@ export const RegisterPage = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                     disabled={registerMutation.isPending || provincesLoading}
                   >
-                    <option value="">Select Province</option>
+                    <option value="">Pilih Provinsi</option>
                     {provinces.map((prov: any) => (
                       <option key={prov.id} value={`${prov.id}|${prov.name}`}>
                         {prov.name}
@@ -233,7 +234,7 @@ export const RegisterPage = () => {
 
                 <div>
                   <label htmlFor="shipping_city" className="block text-sm font-medium text-gray-700 mb-2">
-                    City *
+                    Kota/Kabupaten *
                   </label>
                   <select
                     id="shipping_city"
@@ -244,7 +245,7 @@ export const RegisterPage = () => {
                     disabled={!formData.shipping_province || registerMutation.isPending || citiesLoading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all disabled:bg-gray-100"
                   >
-                    <option value="">Select City</option>
+                    <option value="">Pilih Kota/Kabupaten</option>
                     {cities.map((city: any) => (
                       <option key={city.id} value={`${city.id}|${city.name}`}>
                         {city.name}
@@ -255,7 +256,7 @@ export const RegisterPage = () => {
 
                 <div>
                   <label htmlFor="shipping_district" className="block text-sm font-medium text-gray-700 mb-2">
-                    District *
+                    Kecamatan *
                   </label>
                   <select
                     id="shipping_district"
@@ -266,7 +267,7 @@ export const RegisterPage = () => {
                     disabled={!formData.shipping_city || registerMutation.isPending || districtsLoading}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all disabled:bg-gray-100"
                   >
-                    <option value="">Select District</option>
+                    <option value="">Pilih Kecamatan</option>
                     {districts.map((dist: any) => (
                       <option key={dist.id} value={`${dist.id}|${dist.name}`}>
                         {dist.name}
@@ -277,7 +278,7 @@ export const RegisterPage = () => {
 
                 <div>
                   <label htmlFor="zip" className="block text-sm font-medium text-gray-700 mb-2">
-                    Postal Code *
+                    Kode Pos *
                   </label>
                   <input
                     id="zip"
@@ -296,11 +297,11 @@ export const RegisterPage = () => {
 
             {/* Contact Information Section */}
             <div className="border-b border-gray-200 pb-6">
-              <h2 className="text-lg font-semibold text-primary mb-4">Contact Information</h2>
+              <h2 className="text-lg font-semibold text-primary mb-4">Informasi Kontak</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="phone1" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone 1 *
+                    Nomor Telepon 1 *
                   </label>
                   <input
                     id="phone1"
@@ -317,7 +318,7 @@ export const RegisterPage = () => {
 
                 <div>
                   <label htmlFor="phone2" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone 2 *
+                    Nomor Telepon 2 *
                   </label>
                   <input
                     id="phone2"
@@ -334,7 +335,7 @@ export const RegisterPage = () => {
 
                 <div className="md:col-span-2">
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
+                    Alamat Email *
                   </label>
                   <input
                     id="email"
@@ -351,7 +352,7 @@ export const RegisterPage = () => {
 
                 <div className="md:col-span-2">
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                    Password *
+                    Kata Sandi *
                   </label>
                   <div className="relative">
                     <input
@@ -387,11 +388,11 @@ export const RegisterPage = () => {
 
             {/* Bank Account Section */}
             <div className="border-b border-gray-200 pb-6">
-              <h2 className="text-lg font-semibold text-primary mb-4">Bank Account Information</h2>
+              <h2 className="text-lg font-semibold text-primary mb-4">Informasi Rekening Bank</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label htmlFor="acc_name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Account Holder Name *
+                    Nama Pemilik Rekening *
                   </label>
                   <input
                     id="acc_name"
@@ -407,7 +408,7 @@ export const RegisterPage = () => {
 
                 <div>
                   <label htmlFor="acc_no" className="block text-sm font-medium text-gray-700 mb-2">
-                    Account Number *
+                    Nomor Rekening *
                   </label>
                   <input
                     id="acc_no"
@@ -423,7 +424,7 @@ export const RegisterPage = () => {
 
                 <div>
                   <label htmlFor="acc_bank" className="block text-sm font-medium text-gray-700 mb-2">
-                    Bank Name *
+                    Nama Bank *
                   </label>
                   <input
                     id="acc_bank"
@@ -451,13 +452,13 @@ export const RegisterPage = () => {
                 disabled={registerMutation.isPending}
               />
               <label htmlFor="terms" className="ml-3 text-sm text-gray-700">
-                I agree to the{' '}
+                Saya setuju dengan{' '}
                 <a href="/terms" className="text-accent hover:text-accent-hover font-medium">
-                  Terms and Conditions
+                  Syarat dan Ketentuan
                 </a>{' '}
-                and{' '}
+                dan{' '}
                 <a href="/privacy" className="text-accent hover:text-accent-hover font-medium">
-                  Privacy Policy
+                  Kebijakan Privasi
                 </a>
               </label>
             </div>
@@ -475,10 +476,10 @@ export const RegisterPage = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Creating Account...
+                  Membuat Akun...
                 </span>
               ) : (
-                'Create Supplier Account'
+                'Buat Akun Supplier'
               )}
             </button>
           </form>
@@ -486,9 +487,9 @@ export const RegisterPage = () => {
           {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
+              Sudah punya akun?{' '}
               <a href="/login" className="font-semibold text-accent hover:text-accent-hover transition-colors">
-                Sign in here
+                Masuk di sini
               </a>
             </p>
           </div>

@@ -40,8 +40,8 @@ export const LoginPage = () => {
               </div>
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-primary mb-2">Welcome back!</h2>
-              <p className="text-gray-600">Please enter your credentials to access your account</p>
+              <h2 className="text-3xl font-bold text-primary mb-2">Selamat Datang Kembali!</h2>
+              <p className="text-gray-600">Silakan masukkan kredensial Anda untuk mengakses akun</p>
             </div>
           </div>
 
@@ -53,7 +53,7 @@ export const LoginPage = () => {
               </svg>
               <div className="flex-1">
                 <p className="text-sm font-medium text-red-800">
-                  {loginMutation.error?.message || 'Login failed. Please check your credentials.'}
+                  {loginMutation.error?.message || 'Login gagal. Silakan periksa kredensial Anda.'}
                 </p>
               </div>
               <button
@@ -72,7 +72,7 @@ export const LoginPage = () => {
             {/* Username Input */}
             <div>
               <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
-                Username
+                Nama Pengguna
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -87,7 +87,7 @@ export const LoginPage = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all text-primary placeholder-gray-400"
-                  placeholder="Enter your username"
+                  placeholder="Masukkan nama pengguna Anda"
                   disabled={loginMutation.isPending}
                   autoComplete="username"
                 />
@@ -112,7 +112,7 @@ export const LoginPage = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="w-full pl-12 pr-12 py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all text-primary placeholder-gray-400"
-                  placeholder="Enter your password"
+                  placeholder="Masukkan kata sandi Anda"
                   disabled={loginMutation.isPending}
                   autoComplete="current-password"
                 />
@@ -144,10 +144,10 @@ export const LoginPage = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent cursor-pointer"
                 />
-                <span className="ml-2 text-sm text-gray-700">Remember me</span>
+                <span className="ml-2 text-sm text-gray-700">Ingat saya</span>
               </label>
               <a href="/forgot-password" className="text-sm font-medium text-secondary hover:text-primary transition-colors">
-                Forgot password?
+                Lupa kata sandi?
               </a>
             </div>
 
@@ -164,10 +164,10 @@ export const LoginPage = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Signing in...
+                  Sedang masuk...
                 </span>
               ) : (
-                'Sign In'
+                'Masuk'
               )}
             </button>
           </form>
@@ -175,9 +175,9 @@ export const LoginPage = () => {
           {/* Register Link */}
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              Belum punya akun?{' '}
               <a href="/register" className="font-semibold text-accent hover:text-accent-hover transition-colors">
-                Create an account
+                Buat akun
               </a>
             </p>
           </div>
@@ -191,9 +191,9 @@ export const LoginPage = () => {
         <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
         
         <div className="relative z-10 text-white max-w-md">
-          <h2 className="text-4xl font-bold mb-6">Manage Your Business with Ease</h2>
+          <h2 className="text-4xl font-bold mb-6">Kelola Bisnis Anda dengan Mudah</h2>
           <p className="text-lg text-gray-300 mb-8">
-            Access powerful tools to manage your products, track inventory, and grow your business with LapakBenz Merchant Admin Panel.
+            Akses alat-alat canggih untuk mengelola produk, melacak inventaris, dan mengembangkan bisnis Anda dengan Panel Admin Merchant LapakBenz.
           </p>
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export const LoginPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-gray-100">Real-time inventory management</p>
+              <p className="text-gray-100">Manajemen inventaris real-time</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-accent/30 rounded-lg flex items-center justify-center backdrop-blur-sm">
@@ -210,7 +210,7 @@ export const LoginPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-gray-100">Comprehensive analytics dashboard</p>
+              <p className="text-gray-100">Dashboard analitik yang komprehensif</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-accent/30 rounded-lg flex items-center justify-center backdrop-blur-sm">
@@ -218,7 +218,7 @@ export const LoginPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-gray-100">Secure and reliable platform</p>
+              <p className="text-gray-100">Platform yang aman dan terpercaya</p>
             </div>
           </div>
         </div>

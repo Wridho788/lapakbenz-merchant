@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useRequestOtp, useVerifyOtp } from '../hooks/useAuth';
 
 export const VerificationPage = () => {
@@ -24,7 +25,7 @@ export const VerificationPage = () => {
     }
 
     // Request OTP on mount
-    requestOtpMutation.mutate({ phone });
+    requestOtpMutation.mutate({ username: phone });
   }, [phone, userId, navigate]);
 
   // Countdown timer
@@ -63,7 +64,7 @@ export const VerificationPage = () => {
     if (!canResend) return;
 
     try {
-      await requestOtpMutation.mutateAsync({ phone });
+      await requestOtpMutation.mutateAsync({ username: phone });
       setCountdown(60);
       setCanResend(false);
       setOtp(['', '', '', '']);
@@ -76,7 +77,7 @@ export const VerificationPage = () => {
     const otpValue = otp.join('');
     
     if (otpValue.length !== 4) {
-      alert('Please enter complete 4-digit OTP');
+      toast.error('Mohon masukkan 4 digit kode OTP lengkap');
       return;
     }
 
@@ -86,13 +87,27 @@ export const VerificationPage = () => {
         otp: otpValue,
       });
 
-      if (result.success || result.content?.status === 1) {
-        alert('Verification successful! Please login with your credentials.');
-        navigate('/login', { replace: true });
+      if (result.success || result.content?.status === 1 || result.content?.verified === 1 || String(result.content?.verified) === '1') {
+        // Check if account status is active
+        if (result.content?.status === 0 || String(result.content?.status) === '0') {
+          // Account verified but not active yet
+          toast.success(
+            'Akun Anda telah berhasil diverifikasi! Mohon menunggu persetujuan admin untuk mengaktifkan akun Anda.',
+            { duration: 6000 }
+          );
+        } else {
+          // Account verified and active
+          toast.success('Verifikasi berhasil! Silakan login dengan kredensial Anda.');
+        }
+        
+        // Navigate to login after a short delay
+        setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 1500);
       }
     } catch (error: any) {
       console.error('Verification failed:', error);
-      alert(error?.message || 'Verification failed. Please try again.');
+      toast.error(error?.message || 'Verifikasi gagal. Silakan coba lagi.');
     }
   };
 
@@ -104,9 +119,9 @@ export const VerificationPage = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-accent rounded-xl mb-4 shadow-accent p-3">
             <img src="/lapakbenz.png" alt="LapakBenz Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-primary">Verify Your Account</h1>
+          <h1 className="text-3xl font-bold text-primary">Verifikasi Akun Anda</h1>
           <p className="text-gray-600 mt-2">
-            We've sent a 4-digit verification code to
+            Kami telah mengirimkan kode verifikasi 4 digit ke
           </p>
           <p className="text-accent font-semibold mt-1">{phone}</p>
         </div>
@@ -120,7 +135,7 @@ export const VerificationPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm font-medium text-green-800">
-                OTP sent successfully!
+                Kode OTP berhasil dikirim!
               </p>
             </div>
           )}
@@ -132,7 +147,7 @@ export const VerificationPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm font-medium text-red-800">
-                {requestOtpMutation.error?.message || verifyOtpMutation.error?.message || 'An error occurred'}
+                {requestOtpMutation.error?.message || verifyOtpMutation.error?.message || 'Terjadi kesalahan'}
               </p>
             </div>
           )}
@@ -140,7 +155,7 @@ export const VerificationPage = () => {
           {/* OTP Input */}
           <div className="mb-8">
             <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
-              Enter Verification Code
+              Masukkan Kode Verifikasi
             </label>
             <div className="flex justify-center gap-3">
               {otp.map((digit, index) => (
@@ -171,10 +186,10 @@ export const VerificationPage = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Verifying...
+                Memverifikasi...
               </span>
             ) : (
-              'Verify Account'
+              'Verifikasi Akun'
             )}
           </button>
 
@@ -186,11 +201,11 @@ export const VerificationPage = () => {
                 disabled={requestOtpMutation.isPending}
                 className="text-accent hover:text-accent-hover font-medium transition-colors disabled:opacity-50"
               >
-                {requestOtpMutation.isPending ? 'Sending...' : 'Resend Code'}
+                {requestOtpMutation.isPending ? 'Mengirim...' : 'Kirim Ulang Kode'}
               </button>
             ) : (
               <p className="text-sm text-gray-600">
-                Resend code in <span className="font-semibold text-accent">{countdown}s</span>
+                Kirim ulang kode dalam <span className="font-semibold text-accent">{countdown}d</span>
               </p>
             )}
           </div>
@@ -201,7 +216,7 @@ export const VerificationPage = () => {
               onClick={() => navigate('/register', { replace: true })}
               className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
             >
-              ← Back to Registration
+              ← Kembali ke Pendaftaran
             </button>
           </div>
         </div>
