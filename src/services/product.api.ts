@@ -80,34 +80,38 @@ export const productApi = {
     );
     return response.data;
   },
-
   // add product
-  addProduct: async (productData: any) => {
-    const token = useAuthStore.getState().token;
+  addProduct: async (productData: FormData) => {
+  const token = useAuthStore.getState().token;
 
-    const response = await apiClient.post(
-      API_ENDPOINTS.ADD_PRODUCT,
-      productData,
-      {
-        headers: {
-          "X-auth-token": token || "",
-        },
-      }
-    );
-    return response.data;
-  },
-
-  // update product
-  updateProduct: async (productId: string, productData: any) => {
-    const token = useAuthStore.getState().token;
-    const url = `${API_ENDPOINTS.UPDATE_PRODUCT}${productId}`;
-    const response = await apiClient.put(url, productData, {
+  const response = await apiClient.post(
+    API_ENDPOINTS.ADD_PRODUCT,
+    productData,
+    {
       headers: {
         "X-auth-token": token || "",
+        "Content-Type": "multipart/form-data",
       },
-    });
-    return response.data;
-  },
+    }
+  );
+  return response.data;
+},
+// update product
+updateProduct: async ({ productId, data }: { productId: string; data: FormData }) => {
+  const token = useAuthStore.getState().token;
+
+  const response = await apiClient.post(
+    `${API_ENDPOINTS.UPDATE_PRODUCT}/${productId}`,
+    data,
+    {
+      headers: {
+        "X-auth-token": token || "",
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return response.data;
+},
 
   // add product image
   addProductImage: async (productId: string, imageData: any) => {

@@ -130,7 +130,7 @@ export function useUpdateProduct(): UseMutationResult<
   return useMutation({
     mutationFn: async ({ productId, data }) => {
       try {
-        return await productApi.updateProduct(productId, data);
+        return await productApi.updateProduct({ productId, data });
       } catch (error) {
         throw error;
       }
