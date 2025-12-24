@@ -55,7 +55,7 @@ export const authApi = {
         'X-auth-token': token || ''
       }
     });
-    return response.data;
+    return response;
   },
 
   // Request OTP

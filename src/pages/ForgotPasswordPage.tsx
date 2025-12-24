@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useRequestOtp } from "../hooks/useAuth";
@@ -10,9 +9,7 @@ export const ForgotPasswordPage = () => {
 
   const [phone, setPhone] = useState("");
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     if (!phone.trim()) {
       toast.error("Mohon masukkan email atau nomor telepon");
       return;
@@ -21,16 +18,28 @@ export const ForgotPasswordPage = () => {
     try {
       const result = await requestOtpMutation.mutateAsync({ username: phone });
       console.log(result, 'result');
+      
+      // Hanya navigate ke reset password jika berhasil
       if (result.success || result.status === 200) {
         toast.success("Kode OTP berhasil dikirim! Silakan cek email/SMS Anda.");
+        navigate("/reset-password", {
+          state: { phone },
+          replace: true,
+        });
+      } else {
+        // Tampilkan error dari response API
+        const errorMessage = result.error || result.message || "Gagal mengirim OTP";
+        toast.error(errorMessage);
       }
-      navigate("/reset-password", {
-        state: { phone },
-        replace: true,
-      });
     } catch (error: any) {
       console.error("Request OTP failed:", error);
-      toast.error(error?.message || "Gagal mengirim OTP. Silakan coba lagi.");
+      // Tampilkan error message dari response atau error object
+      const errorMessage = 
+        error?.response?.data?.error || 
+        error?.response?.data?.message || 
+        error?.message || 
+        "Gagal mengirim OTP. Silakan coba lagi.";
+      toast.error(errorMessage);
     }
   };
 
@@ -76,7 +85,7 @@ export const ForgotPasswordPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             {/* Phone/Email Input */}
             <div>
               <label
@@ -116,7 +125,7 @@ export const ForgotPasswordPage = () => {
 
             {/* Submit Button */}
             <button
-              type="submit"
+              onClick={handleSubmit}
               disabled={requestOtpMutation.isPending}
               className="w-full bg-accent text-white py-3.5 px-4 rounded-lg hover:bg-accent-hover focus:ring-4 focus:ring-accent/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold shadow-accent"
             >
@@ -148,7 +157,7 @@ export const ForgotPasswordPage = () => {
                 "Kirim OTP"
               )}
             </button>
-          </form>
+          </div>
 
           {/* Back to Login */}
           <div className="mt-6 text-center pt-6 border-t border-gray-200">
