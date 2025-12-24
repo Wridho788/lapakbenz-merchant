@@ -67,6 +67,12 @@ export const CreateProductPage = () => {
     e.preventDefault();
     setShowError(true);
 
+    // Validasi gambar wajib untuk add mode
+    if (!isEditMode && !imageFile) {
+      toast.error('Gambar produk wajib diupload!');
+      return;
+    }
+
     try {
       const data = new FormData();
       data.append('name', formData.name);
@@ -83,6 +89,7 @@ export const CreateProductPage = () => {
         data.append('weight', formData.weight);
       }
       
+      // Upload gambar untuk add mode (wajib) atau edit mode (opsional)
       if (imageFile) {
         data.append('userfile', imageFile);
       }
@@ -92,18 +99,42 @@ export const CreateProductPage = () => {
         if (result.success) {
           toast.success('Produk berhasil diperbarui!');
           navigate('/products');
+        } else {
+          toast.error(result.message || result.error || 'Gagal memperbarui produk');
         }
       } else {
         const result = await addProductMutation.mutateAsync(data);
         if (result.success) {
           toast.success('Produk berhasil dibuat!');
           navigate('/products');
+        } else {
+          toast.error(result.message || result.error || 'Gagal membuat produk');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save product:', error);
-      toast.error('Gagal menyimpan produk');
+      const errorMessage = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Gagal menyimpan produk';
+      toast.error(errorMessage);
     }
+  };
+
+  // Validasi form: semua field wajib terisi, gambar wajib untuk add mode
+  const isFormValid = () => {
+    const baseValidation = 
+      formData.name.trim() !== '' &&
+      formData.price.trim() !== '' &&
+      formData.category.trim() !== '' &&
+      formData.condition.trim() !== '' &&
+      formData.qty.trim() !== '' &&
+      formData.shortdesc.trim() !== '';
+
+    // Untuk add mode, gambar wajib ada
+    if (!isEditMode) {
+      return baseValidation && imageFile !== null;
+    }
+
+    // Untuk edit mode, gambar opsional
+    return baseValidation;
   };
 
   const isPending = isEditMode ? updateProductMutation.isPending : addProductMutation.isPending;
@@ -334,8 +365,13 @@ export const CreateProductPage = () => {
                   disabled={isPending}
                 />
                 {imageFile && (
-                  <p className="mt-2 text-sm text-gray-600">
-                    File terpilih: {imageFile.name}
+                  <p className="mt-2 text-sm text-green-600">
+                    ✓ File terpilih: {imageFile.name}
+                  </p>
+                )}
+                {!isEditMode && !imageFile && (
+                  <p className="mt-2 text-sm text-red-600">
+                    * Gambar produk wajib diupload untuk produk baru
                   </p>
                 )}
               </div>
@@ -343,7 +379,7 @@ export const CreateProductPage = () => {
               <div className="flex gap-4 pt-4">
                 <button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isPending || !isFormValid()}
                   className="flex-1 bg-accent text-white py-3 px-4 rounded-lg hover:bg-accent-hover focus:ring-4 focus:ring-accent/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                   style={{ minHeight: '44px' }}
                 >
