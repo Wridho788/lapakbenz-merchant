@@ -26,7 +26,9 @@ export interface RegisterData {
 }
 
 export interface ForgotPasswordData {
-  email: string;
+  username: string;
+  new_password: string;
+  otp: string;
 }
 
 export interface RequestOtpData {
@@ -47,6 +49,7 @@ export interface AuthResponse {
   success?: boolean;
   message?: string;
   error?: string;
+  status?: number;
   content?: {
     token?: string;
     log?: number;

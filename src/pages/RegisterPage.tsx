@@ -287,7 +287,7 @@ export const RegisterPage = () => {
                     value={formData.zip}
                     onChange={handleChange}
                     required
-                    placeholder="20123"
+                    placeholder="xxxxx"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                     disabled={registerMutation.isPending}
                   />
@@ -310,7 +310,7 @@ export const RegisterPage = () => {
                     value={formData.phone1}
                     onChange={handleChange}
                     required
-                    placeholder="085158781399"
+                    placeholder="08xxxxxxxxx"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                     disabled={registerMutation.isPending}
                   />
@@ -327,7 +327,7 @@ export const RegisterPage = () => {
                     value={formData.phone2}
                     onChange={handleChange}
                     required
-                    placeholder="085158781399"
+                    placeholder="08xxxxxxxxx"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                     disabled={registerMutation.isPending}
                   />

@@ -20,6 +20,10 @@ export const API_ENDPOINTS = {
   SEARCH_PRODUCTS: 'product/search',
   PRODUCT_CATEGORIES: 'product/category',
   PRODUCT_CITY: 'product/city_product',
+  ADD_PRODUCT: 'product/add',
+  UPDATE_PRODUCT: 'product/update/', // /:productId
+  ADD_PRODUCT_IMAGE: 'product/add_image/',
+  PUBLISH_PRODUCT: 'product/publish/', // /:productId
 
   // province, city, district endpoints
   PROVINCES: 'city/get_province_rj',

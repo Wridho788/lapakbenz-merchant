@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useProductDetail } from '../hooks/useProduct';
+import { useProductDetail, usePublishProduct, useAddProductImage } from '../hooks/useProduct';
 import { DashboardLayout } from '../layouts/DashboardLayout';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
 import {
   MdArrowBack,
   MdStar,
@@ -9,14 +10,19 @@ import {
   MdDelete,
   MdScale,
   MdInventory,
+  MdPublish,
+  MdAddPhotoAlternate,
 } from 'react-icons/md';
 
 export const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: productData, isLoading, isError, error, refetch } = useProductDetail(id || '');
+  const publishProductMutation = usePublishProduct();
+  const addProductImageMutation = useAddProductImage();
   
   // Extract product from API response
   const product = productData?.data;
@@ -45,6 +51,61 @@ export const ProductDetailPage = () => {
   };
 
   const images = getAllImages();
+
+  const handlePublishProduct = async () => {
+    if (!id) return;
+    
+    try {
+      const result = await publishProductMutation.mutateAsync(id);
+      if (result.success) {
+        toast.success('Produk berhasil dipublikasikan!');
+        refetch();
+      } else {
+        toast.error(result.message || 'Gagal mempublikasikan produk');
+      }
+    } catch (error) {
+      console.error('Failed to publish product:', error);
+      toast.error('Gagal mempublikasikan produk');
+    }
+  };
+
+  const handleUpdateProduct = () => {
+    if (!product || !id) return;
+    navigate(`/products/${id}/edit`, { state: { product } });
+  };
+
+  const handleAddImage = () => {
+    if (images.length >= 6) {
+      toast.error('Maksimal 6 gambar per produk');
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !id) return;
+
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('userfile', file);
+
+    try {
+      const result = await addProductImageMutation.mutateAsync({
+        productId: id,
+        imageData: formData,
+      });
+
+      if (result.success) {
+        toast.success('Gambar berhasil ditambahkan!');
+        refetch();
+      } else {
+        toast.error(result.message || 'Gagal menambahkan gambar');
+      }
+    } catch (error) {
+      console.error('Failed to add image:', error);
+      toast.error('Gagal menambahkan gambar');
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -302,30 +363,86 @@ export const ProductDetailPage = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 mt-auto">
-                  <button
-                    onClick={() => navigate(`/products/${product.id}/edit`)}
-                    className="flex items-center justify-center gap-2 flex-1 bg-accent text-white px-6 py-3.5 rounded-xl hover:bg-accent-hover transition-colors font-medium shadow-md hover:shadow-lg"
-                  >
-                    <MdEdit className="w-5 h-5" />
-                    <span>Edit Produk</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          'Apakah Anda yakin ingin menghapus produk ini?'
-                        )
-                      ) {
-                        // TODO: Implement delete functionality
-                        console.log('Delete product:', product.id);
-                      }
-                    }}
-                    className="flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-red-200 text-red-600 rounded-xl hover:bg-red-50 transition-colors font-medium"
-                  >
-                    <MdDelete className="w-5 h-5" />
-                    <span>Hapus</span>
-                  </button>
+                <div className="flex flex-col gap-3 mt-auto">
+                  {/* Primary Actions */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={handlePublishProduct}
+                      disabled={publishProductMutation.isPending}
+                      className="flex items-center justify-center gap-2 flex-1 bg-green-600 text-white px-6 py-3.5 rounded-xl hover:bg-green-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {publishProductMutation.isPending ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          <span>Mempublikasikan...</span>
+                        </>
+                      ) : (
+                        <>
+                          <MdPublish className="w-5 h-5" />
+                          <span>Publikasikan Produk</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleUpdateProduct}
+                      className="flex items-center justify-center gap-2 flex-1 bg-accent text-white px-6 py-3.5 rounded-xl hover:bg-accent-hover transition-colors font-medium shadow-md hover:shadow-lg"
+                    >
+                      <MdEdit className="w-5 h-5" />
+                      <span>Edit Produk</span>
+                    </button>
+                  </div>
+
+                  {/* Secondary Actions */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={handleAddImage}
+                      disabled={addProductImageMutation.isPending || images.length >= 6}
+                      className="flex items-center justify-center gap-2 flex-1 bg-blue-600 text-white px-6 py-3.5 rounded-xl hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {addProductImageMutation.isPending ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          <span>Mengunggah...</span>
+                        </>
+                      ) : (
+                        <>
+                          <MdAddPhotoAlternate className="w-5 h-5" />
+                          <span>Tambah Gambar ({images.length}/6)</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            'Apakah Anda yakin ingin menghapus produk ini?'
+                          )
+                        ) {
+                          // TODO: Implement delete functionality
+                          console.log('Delete product:', product.id);
+                        }
+                      }}
+                      className="flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-red-200 text-red-600 rounded-xl hover:bg-red-50 transition-colors font-medium"
+                    >
+                      <MdDelete className="w-5 h-5" />
+                      <span>Hapus</span>
+                    </button>
+                  </div>
+                  
+                  {/* Hidden file input for image upload */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    className="hidden"
+                  />
                 </div>
               </div>
             </div>
