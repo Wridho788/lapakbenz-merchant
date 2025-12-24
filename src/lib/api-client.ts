@@ -31,13 +31,33 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    // Handle 401 Unauthorized
+    // Log untuk debugging
+    console.log('API Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      message: error.message
+    });
+
+    // PENTING: Jangan redirect pada endpoint forgot/reset password
+    // Biarkan komponen yang handle error-nya
+    const isForgotPasswordEndpoint = 
+      error.config?.url?.includes('/forgot') || 
+      error.config?.url?.includes('/reset') ||
+      error.config?.url?.includes('/otp');
+
+    if (isForgotPasswordEndpoint) {
+      console.log('Error pada forgot/reset password flow - tidak akan redirect');
+      return Promise.reject(error);
+    }
+
+    // Handle 401 Unauthorized HANYA untuk endpoint lain
     if (error.response?.status === 401) {
       // Token expired or invalid
       useAuthStore.getState().logout();
       
       // Only redirect if not already on login page
       if (window.location.pathname !== '/login') {
+        console.log('401 Unauthorized - redirecting to login');
         window.location.href = '/login';
       }
     }
@@ -50,5 +70,4 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 export default apiClient;

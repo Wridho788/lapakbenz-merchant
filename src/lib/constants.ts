@@ -24,7 +24,7 @@ export const API_ENDPOINTS = {
   UPDATE_PRODUCT: 'product/update/', // /:productId
   ADD_PRODUCT_IMAGE: 'product/add_image/',
   PUBLISH_PRODUCT: 'product/publish/', // /:productId
-
+  PRODUCT_CATEGORY: 'product/category/', // /:categoryId
   // province, city, district endpoints
   PROVINCES: 'city/get_province_rj',
   CITIES: 'city/get_city_rj/', // /:provinceId

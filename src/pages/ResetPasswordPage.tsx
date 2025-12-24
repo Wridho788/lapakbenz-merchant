@@ -21,47 +21,35 @@ export const ResetPasswordPage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async () => {
-    if (!formData.username || !formData.new_password || !formData.otp) {
-      toast.error("Mohon lengkapi semua field");
-      return;
-    }
+    // ... validation ...
 
-    if (formData.new_password.length < 6) {
-      toast.error("Kata sandi minimal 6 karakter");
-      return;
-    }
+    console.log("=== SUBMIT START ===");
 
     try {
+      console.log("Before mutateAsync");
       const result = await forgotPasswordMutation.mutateAsync(formData);
-      console.log(result, "result reset password");
-      
-      // Hanya redirect ke login jika berhasil
-      if (result.status === 200) {
-        toast.success(
-          "Kata sandi berhasil diubah! Silakan login dengan kata sandi baru Anda."
-        );
-        setTimeout(() => {
-          navigate("/login", { replace: true });
-        }, 1500);
-      } else {
-        // Tampilkan error dari response API
-        const errorMessage = result.error || result.message || "Gagal mengubah kata sandi";
-        toast.error(errorMessage);
-      }
+      console.log("After mutateAsync - SUCCESS:", result);
+
+      toast.success("...");
+
+      console.log("Before navigate to login");
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 1500);
     } catch (error: any) {
-      console.error("Reset password failed:", error);
-      // Tampilkan error message dari response atau error object
-      const errorMessage = 
-        error?.response?.data?.error || 
-        error?.response?.data?.message || 
-        error?.message || 
-        "Gagal mengubah kata sandi. Silakan coba lagi.";
+      console.log("After mutateAsync - ERROR:", error);
+      console.log("Error status:", error?.status);
+      console.log("Will show toast and STAY on page");
+
+      const errorMessage =
+        error?.error || "Terjadi kesalahan saat mengubah kata sandi";
       toast.error(errorMessage);
+
+      console.log("=== SUBMIT END (ERROR) ===");
+      // NO NAVIGATION HERE!
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-white to-accent/10 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
@@ -85,6 +73,7 @@ export const ResetPasswordPage = () => {
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Error Alert */}
+          {/* Error Alert - FIXED */}
           {forgotPasswordMutation.isError && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
               <svg
@@ -100,9 +89,14 @@ export const ResetPasswordPage = () => {
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <p className="text-sm font-medium text-red-800">
-                {forgotPasswordMutation.error?.message || "Terjadi kesalahan"}
-              </p>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">
+                  {/* ✅ PERBAIKAN: Akses error.message, bukan error.name */}
+                  {(forgotPasswordMutation.error as any)?.message ||
+                    (forgotPasswordMutation.error as any)?.error ||
+                    "Terjadi kesalahan"}
+                </p>
+              </div>
             </div>
           )}
 

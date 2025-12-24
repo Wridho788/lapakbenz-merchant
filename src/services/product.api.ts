@@ -135,5 +135,12 @@ export const productApi = {
       }
     );
     return response.data;
+  },
+
+  // get product category
+  getProductCategory: async () => {
+    const url = `${API_ENDPOINTS.PRODUCT_CATEGORY}`;
+    const response = await apiClient.get<{ success: boolean; data: any }>(url);
+    return response.data;
   }
 };

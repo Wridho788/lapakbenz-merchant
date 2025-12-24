@@ -64,10 +64,10 @@ export const useRegister = () => {
 export const useForgotPassword = () => {
   return useMutation({
     mutationFn: authApi.forgotPassword,
+    retry: false, // Jangan retry pada error
     onError: (error) => {
-      const normalized = normalizeError(error);
-      console.error('Forgot password failed:', normalized);
-      return normalized;
+      console.error('Forgot password failed:', error);
+      // Remove return statement - tidak berguna
     },
   });
 };

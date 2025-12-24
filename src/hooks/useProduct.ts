@@ -171,3 +171,13 @@ export function useAddProductImage(): UseMutationResult<
     },
   });
 }
+
+// get product category
+export function useProductCategory(): UseQueryResult<any, Error> {
+  return useQuery({
+    queryKey: ["productCategory"],
+    queryFn: () => productApi.getProductCategory(),
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    retry: 2,
+  });
+}
