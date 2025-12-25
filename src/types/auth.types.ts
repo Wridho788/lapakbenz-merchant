@@ -74,13 +74,11 @@ export interface Supplier {
 }
 
 export interface DecodedToken {
-  content: {
-    userid: string;
-    username: string;
-    name: string;
-    phone?: string;
-    log?: number;
-  };
+  userid: string;
+  username: string;
+  name: string;
+  phone?: string;
+  log?: number;
 }
 
 export interface AuthState {

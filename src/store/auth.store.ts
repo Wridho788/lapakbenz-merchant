@@ -73,7 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       // Decode Token Guard: Only called once on app load
       // If it fails → logout + no retry
-      const response = await apiClient.get<DecodedToken>(
+      const response = await apiClient.get<{ content: DecodedToken }>(
         API_ENDPOINTS.DECODE_TOKEN,
         {
           headers: {

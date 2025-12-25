@@ -20,17 +20,14 @@ export const useLogin = () => {
         try {
           const response = await authApi.decodeToken();
           // Response structure: { content: { userid, name, username, phone, log } }
-          if (response && response.content) {
-            const decodedUser = response.content;
+          if (response) {
             setUser({
-              id: decodedUser.userid,
-              name: decodedUser.name,
-              email: decodedUser.username,
-              phone: decodedUser.phone || '',
+              id: response.userid,
+              name: response.name,
+              email: response.username,
+              phone: response.phone || '',
               verified: true,
             });
-          } else {
-            console.error('Failed to decode token: Invalid response structure', response);
           }
         } catch (error) {
           console.error('Failed to decode token:', error);
