@@ -188,10 +188,6 @@ export const CreateProductPage = () => {
 
           toast.success("Produk berhasil diperbarui!");
           navigate("/products");
-        } else {
-          const errorMsg =
-            result.message || result.error || "Gagal memperbarui produk";
-          toast.error(errorMsg);
         }
       } else {
         const result = await addProductMutation.mutateAsync(data);
