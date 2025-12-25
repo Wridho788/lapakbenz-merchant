@@ -46,8 +46,6 @@ export interface VerifyOtpParams {
 }
 
 export interface AuthResponse {
-  success?: boolean;
-  message?: string;
   error?: string;
   status?: number;
   content?: {

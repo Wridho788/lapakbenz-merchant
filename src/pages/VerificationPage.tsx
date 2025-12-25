@@ -87,7 +87,7 @@ export const VerificationPage = () => {
         otp: otpValue,
       });
 
-      if (result.success || result.content?.status === 1 || result.content?.verified === 1 || String(result.content?.verified) === '1') {
+      if (result.content?.status === 1 || result.content?.verified === 1 || String(result.content?.verified) === '1') {
         // Check if account status is active
         if (result.content?.status === 0 || String(result.content?.status) === '0') {
           // Account verified but not active yet

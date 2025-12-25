@@ -129,12 +129,19 @@ export const authApi = {
   // Change Password
   changePassword: async (data: ChangePasswordData): Promise<AuthResponse> => {
     const token = useAuthStore.getState().token;
+    
+    // Convert to URL-encoded format
+    const params = new URLSearchParams();
+    params.append("old_pass", data.old_password);
+    params.append("new_pass", data.new_password);
+    
     const response = await apiClient.post<AuthResponse>(
       API_ENDPOINTS.CHANGE_PASSWORD,
-      data,
+      params.toString(),
       {
         headers: {
           "X-auth-token": token || "",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );

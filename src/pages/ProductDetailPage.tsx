@@ -12,20 +12,22 @@ import {
   MdInventory,
   MdPublish,
   MdAddPhotoAlternate,
+  MdImage,
 } from 'react-icons/md';
 
 export const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const { data: productData, isLoading, isError, error, refetch } = useProductDetail(id || '');
   const publishProductMutation = usePublishProduct();
   const addProductImageMutation = useAddProductImage();
-  
+  console.log('Product Data:', productData);
   // Extract product from API response
-  const product = productData?.data;
+  const product = productData?.content;
 
   // Format price to IDR
   const formatPrice = (price: number) => {
@@ -40,17 +42,27 @@ export const ProductDetailPage = () => {
   const getAllImages = () => {
     if (!product) return [];
     const images = [];
-    if (product.image) images.push(product.image);
+    
+    // Main image with full URL
+    if (product.image) {
+      const imageUrl = product.url_image 
+        ? `${product.url_image}${product.image}`
+        : product.image;
+      images.push(imageUrl);
+    }
+    
+    // Additional images
     if (product.url1) images.push(product.url1);
     if (product.url2) images.push(product.url2);
     if (product.url3) images.push(product.url3);
     if (product.url4) images.push(product.url4);
     if (product.url5) images.push(product.url5);
-    if (product.url6) images.push(product.url6);
+    
     return images;
   };
 
   const images = getAllImages();
+  const MAX_IMAGES = 5;
 
   const handlePublishProduct = async () => {
     if (!id) return;
@@ -74,19 +86,20 @@ export const ProductDetailPage = () => {
     navigate(`/products/${id}/edit`, { state: { product } });
   };
 
-  const handleAddImage = () => {
-    if (images.length >= 6) {
-      toast.error('Maksimal 6 gambar per produk');
-      return;
+  const handleDeleteProduct = () => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+      // TODO: Implement delete functionality
+      toast.error('Fitur hapus produk belum tersedia');
+      console.log('Delete product:', product?.id);
     }
-    fileInputRef.current?.click();
   };
 
-  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0] || !id) return;
+  const handleImageUpload = async (slotIndex: number, file: File) => {
+    if (!id) return;
 
-    const file = e.target.files[0];
+    setUploadingSlot(slotIndex);
     const formData = new FormData();
+    formData.append('orders', String(slotIndex + 1));
     formData.append('userfile', file);
 
     try {
@@ -95,16 +108,30 @@ export const ProductDetailPage = () => {
         imageData: formData,
       });
 
-      if (result.success) {
-        toast.success('Gambar berhasil ditambahkan!');
+      console.log(result)
+
+      if (result.status === 200) {
+        toast.success(`Gambar ${slotIndex + 1} berhasil ditambahkan!`);
         refetch();
       } else {
-        toast.error(result.message || 'Gagal menambahkan gambar');
+        toast.error(result.message || result.error || 'Gagal menambahkan gambar');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add image:', error);
-      toast.error('Gagal menambahkan gambar');
+      const errorMsg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Gagal menambahkan gambar';
+      toast.error(errorMsg);
+    } finally {
+      setUploadingSlot(null);
     }
+  };
+
+  const handleFileSelect = (slotIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(slotIndex, file);
+    }
+    // Reset input value
+    e.target.value = '';
   };
 
   return (
@@ -170,128 +197,283 @@ export const ProductDetailPage = () => {
 
         {/* Product Details */}
         {product && !isLoading && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-              {/* Product Images Section */}
-              <div>
-                {/* Main Image */}
-                <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4">
-                  <img
-                    src={images[selectedImage] || '/placeholder-product.png'}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder-product.png';
-                    }}
-                  />
+          <div className="space-y-6">
+            {/* Header Card with Action Buttons */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                    {product.name}
+                  </h1>
+                  {product.sku && (
+                    <p className="text-sm text-gray-500">SKU: {product.sku}</p>
+                  )}
                 </div>
-
-                {/* Thumbnail Gallery */}
-                {images.length > 1 && (
-                  <div className="grid grid-cols-6 gap-2">
-                    {images.map((image, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedImage(index)}
-                        className={`aspect-square bg-gray-100 rounded-lg overflow-hidden hover:opacity-75 transition-all ${
-                          selectedImage === index
-                            ? 'ring-2 ring-accent ring-offset-2'
-                            : ''
-                        }`}
-                      >
-                        <img
-                          src={image}
-                          alt={`${product.name} ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder-product.png';
-                          }}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Product Information Section */}
-              <div className="flex flex-col">
-                {/* SKU */}
-                {product.sku && (
-                  <div className="mb-3">
-                    <span className="text-sm text-gray-500">SKU: {product.sku}</span>
-                  </div>
-                )}
-
-                {/* Product Name */}
-                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                  {product.name}
-                </h1>
-
-                {/* Rating */}
-                {product.rating && (
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="flex items-center gap-1">
-                      <MdStar className="w-5 h-5 text-yellow-400 fill-current" />
-                      <span className="font-semibold text-gray-900">
-                        {product.rating}
-                      </span>
-                    </div>
-                    <span className="text-gray-500 text-sm">/ 5.0</span>
-                  </div>
-                )}
-
-                {/* Price */}
-                <div className="mb-6 pb-6 border-b border-gray-200">
-                  <p className="text-sm text-gray-600 mb-2">Harga</p>
-                  <p className="text-4xl lg:text-5xl font-bold text-accent">
-                    {formatPrice(product.price)}
-                  </p>
-                </div>
-
-                {/* Status Badge */}
-                <div className="mb-6">
-                  <span
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
-                      product.status === 1
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}
+                
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={handlePublishProduct}
+                    disabled={publishProductMutation.isPending}
+                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
                   >
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        product.status === 1 ? 'bg-green-500' : 'bg-red-500'
-                      }`}
-                    ></span>
-                    {product.status === 1 ? 'Aktif' : 'Tidak Aktif'}
-                  </span>
+                    {publishProductMutation.isPending ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        <span>Proses...</span>
+                      </>
+                    ) : (
+                      <>
+                        <MdPublish className="w-4 h-4" />
+                        <span>Publish</span>
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={handleUpdateProduct}
+                    className="flex items-center gap-2 bg-accent text-white px-4 py-2.5 rounded-lg hover:bg-accent-hover transition-colors font-medium shadow-sm hover:shadow text-sm"
+                  >
+                    <MdEdit className="w-4 h-4" />
+                    <span>Edit</span>
+                  </button>
+                  
+                  <button
+                    onClick={handleDeleteProduct}
+                    className="flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm hover:shadow text-sm"
+                  >
+                    <MdDelete className="w-4 h-4" />
+                    <span>Hapus</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Images */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Product Images Gallery */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    Gambar Produk
+                  </h2>
+                  
+                  {/* Main Image */}
+                  <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4 border border-gray-200">
+                    <img
+                      src={images[selectedImage] || '/placeholder-product.png'}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder-product.png';
+                      }}
+                    />
+                  </div>
+
+                  {/* Thumbnail Gallery */}
+                  {images.length > 1 && (
+                    <div className="grid grid-cols-5 gap-3">
+                      {images.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedImage(index)}
+                          className={`aspect-square bg-gray-100 rounded-lg overflow-hidden hover:opacity-75 transition-all border-2 ${
+                            selectedImage === index
+                              ? 'border-accent shadow-md'
+                              : 'border-gray-200'
+                          }`}
+                        >
+                          <img
+                            src={image}
+                            alt={`${product.name} ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/placeholder-product.png';
+                            }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Description */}
+                {/* Upload Images Section */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Upload Gambar Tambahan
+                    </h2>
+                    <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                      {images.length} / {MAX_IMAGES}
+                    </span>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 mb-6">
+                    Upload hingga {MAX_IMAGES} gambar untuk produk Anda. Setiap slot memiliki tombol upload tersendiri.
+                  </p>
+
+                  {/* Upload Slots Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {Array.from({ length: MAX_IMAGES }).map((_, index) => {
+                      const hasImage = index < images.length;
+                      const isUploading = uploadingSlot === index;
+
+                      return (
+                        <div
+                          key={index}
+                          className="relative group"
+                        >
+                          <div className={`aspect-square rounded-lg border-2 border-dashed overflow-hidden transition-all ${
+                            hasImage
+                              ? 'border-green-400 bg-green-50'
+                              : 'border-gray-300 bg-gray-50 hover:border-accent hover:bg-accent/5'
+                          }`}>
+                            {hasImage ? (
+                              <div className="relative w-full h-full">
+                                <img
+                                  src={images[index]}
+                                  alt={`Product ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/placeholder-product.png';
+                                  }}
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <span className="text-white text-xs font-medium">
+                                    Slot {index + 1}
+                                  </span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                {isUploading ? (
+                                  <svg className="animate-spin h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                ) : (
+                                  <MdImage className="w-10 h-10 text-gray-400" />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Upload Button */}
+                          {!hasImage && (
+                            <button
+                              onClick={() => fileInputRefs.current[index]?.click()}
+                              disabled={isUploading}
+                              className="mt-2 w-full flex items-center justify-center gap-1.5 bg-accent text-white px-3 py-2 rounded-lg hover:bg-accent-hover transition-colors font-medium text-xs shadow-sm hover:shadow disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                              <MdAddPhotoAlternate className="w-4 h-4" />
+                              <span>{isUploading ? 'Upload...' : 'Upload'}</span>
+                            </button>
+                          )}
+                          
+                          {hasImage && (
+                            <div className="mt-2 text-center">
+                              <span className="text-xs text-green-600 font-medium">
+                                ✓ Terupload
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Hidden file input */}
+                          <input
+                            ref={(el) => {
+                              fileInputRefs.current[index] = el;
+                            }}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileSelect(index, e)}
+                            className="hidden"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {images.length >= MAX_IMAGES && (
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-700 text-center font-medium">
+                        ✓ Semua slot gambar telah terisi
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description Card */}
                 {(product.description || product.shortdesc) && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
                       Deskripsi Produk
-                    </h3>
+                    </h2>
                     <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                       {product.description || product.shortdesc}
                     </p>
                   </div>
                 )}
+              </div>
 
-                {/* Product Specifications */}
-                <div className="mb-6 p-5 bg-gray-50 rounded-xl">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {/* Right Column - Product Info */}
+              <div className="space-y-6">
+                {/* Price & Status Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-sm font-medium text-gray-600 mb-2">Harga</h2>
+                  <p className="text-3xl font-bold text-accent mb-4">
+                    {formatPrice(product.price)}
+                  </p>
+                  
+                  {/* Status Badge */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-sm font-medium text-gray-600">Status:</span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                        product.status === 1
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          product.status === 1 ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      ></span>
+                      {product.status === 1 ? 'Aktif' : 'Tidak Aktif'}
+                    </span>
+                  </div>
+
+                  {/* Rating */}
+                  {product.rating && (
+                    <div className="flex items-center gap-2 pt-4 border-t border-gray-200">
+                      <MdStar className="w-5 h-5 text-yellow-400 fill-current" />
+                      <span className="font-semibold text-gray-900">
+                        {product.rating}
+                      </span>
+                      <span className="text-gray-500 text-sm">/ 5.0</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Specifications Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
                     Spesifikasi
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  </h2>
+                  <div className="space-y-4">
                     {/* Weight */}
                     {product.weight && (
-                      <div className="flex items-start gap-3">
-                        <MdScale className="w-5 h-5 text-gray-400 mt-0.5" />
+                      <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
+                        <MdScale className="w-5 h-5 text-accent mt-0.5" />
                         <div>
-                          <p className="text-sm text-gray-600">Berat</p>
+                          <p className="text-sm text-gray-600 mb-1">Berat</p>
                           <p className="font-semibold text-gray-900">
                             {product.weight} gram
                           </p>
@@ -299,24 +481,24 @@ export const ProductDetailPage = () => {
                       </div>
                     )}
 
-                    {/* Restricted */}
-                    <div className="flex items-start gap-3">
-                      <MdInventory className="w-5 h-5 text-gray-400 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-gray-600">Status Pengiriman</p>
-                        <p className="font-semibold text-gray-900">
-                          {product.restricted === 'N'
-                            ? 'Tidak Terbatas'
-                            : 'Terbatas'}
-                        </p>
+                    {/* Stock/Quantity */}
+                    {product.qty && (
+                      <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
+                        <MdInventory className="w-5 h-5 text-accent mt-0.5" />
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">Stok</p>
+                          <p className="font-semibold text-gray-900">
+                            {product.qty} unit
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
-                    {/* Period */}
-                    {product.period && (
-                      <div className="flex items-start gap-3">
+                    {/* Condition */}
+                    {product.conditions && (
+                      <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
                         <svg
-                          className="w-5 h-5 text-gray-400 mt-0.5"
+                          className="w-5 h-5 text-accent mt-0.5"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -325,13 +507,13 @@ export const ProductDetailPage = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
                         <div>
-                          <p className="text-sm text-gray-600">Periode</p>
+                          <p className="text-sm text-gray-600 mb-1">Kondisi</p>
                           <p className="font-semibold text-gray-900">
-                            {product.period}
+                            {product.conditions === 'new' ? 'Baru' : 'Bekas'}
                           </p>
                         </div>
                       </div>
@@ -340,7 +522,7 @@ export const ProductDetailPage = () => {
                     {/* Product ID */}
                     <div className="flex items-start gap-3">
                       <svg
-                        className="w-5 h-5 text-gray-400 mt-0.5"
+                        className="w-5 h-5 text-accent mt-0.5"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -353,96 +535,13 @@ export const ProductDetailPage = () => {
                         />
                       </svg>
                       <div>
-                        <p className="text-sm text-gray-600">Product ID</p>
+                        <p className="text-sm text-gray-600 mb-1">Product ID</p>
                         <p className="font-semibold text-gray-900">
                           #{product.id}
                         </p>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-3 mt-auto">
-                  {/* Primary Actions */}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={handlePublishProduct}
-                      disabled={publishProductMutation.isPending}
-                      className="flex items-center justify-center gap-2 flex-1 bg-green-600 text-white px-6 py-3.5 rounded-xl hover:bg-green-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                      {publishProductMutation.isPending ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          <span>Mempublikasikan...</span>
-                        </>
-                      ) : (
-                        <>
-                          <MdPublish className="w-5 h-5" />
-                          <span>Publikasikan Produk</span>
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={handleUpdateProduct}
-                      className="flex items-center justify-center gap-2 flex-1 bg-accent text-white px-6 py-3.5 rounded-xl hover:bg-accent-hover transition-colors font-medium shadow-md hover:shadow-lg"
-                    >
-                      <MdEdit className="w-5 h-5" />
-                      <span>Edit Produk</span>
-                    </button>
-                  </div>
-
-                  {/* Secondary Actions */}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={handleAddImage}
-                      disabled={addProductImageMutation.isPending || images.length >= 6}
-                      className="flex items-center justify-center gap-2 flex-1 bg-blue-600 text-white px-6 py-3.5 rounded-xl hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                      {addProductImageMutation.isPending ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          <span>Mengunggah...</span>
-                        </>
-                      ) : (
-                        <>
-                          <MdAddPhotoAlternate className="w-5 h-5" />
-                          <span>Tambah Gambar ({images.length}/6)</span>
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            'Apakah Anda yakin ingin menghapus produk ini?'
-                          )
-                        ) {
-                          // TODO: Implement delete functionality
-                          console.log('Delete product:', product.id);
-                        }
-                      }}
-                      className="flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-red-200 text-red-600 rounded-xl hover:bg-red-50 transition-colors font-medium"
-                    >
-                      <MdDelete className="w-5 h-5" />
-                      <span>Hapus</span>
-                    </button>
-                  </div>
-                  
-                  {/* Hidden file input for image upload */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageFileChange}
-                    className="hidden"
-                  />
                 </div>
               </div>
             </div>

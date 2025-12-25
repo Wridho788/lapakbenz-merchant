@@ -13,6 +13,7 @@ export interface Product {
   updated_at?: string;
   // Additional properties used in ProductDetailPage
   image?: string;
+  url_image?: string;
   url1?: string;
   url2?: string;
   url3?: string;
@@ -26,6 +27,8 @@ export interface Product {
   weight?: number;
   restricted?: string;
   period?: string;
+  qty?: number;
+  conditions?: string;
 }
 
 
@@ -43,7 +46,7 @@ export interface ProductSearchParams {
 export interface ProductListResponse {
   success: boolean;
   message: string;
-  data: Product[];
+  content: Product[];
   pagination: {
     total: number;
     page: number;

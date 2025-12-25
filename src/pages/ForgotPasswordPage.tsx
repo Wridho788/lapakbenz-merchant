@@ -20,7 +20,7 @@ export const ForgotPasswordPage = () => {
       console.log(result, 'result');
       
       // Hanya navigate ke reset password jika berhasil
-      if (result.success || result.status === 200) {
+      if (result.status === 200) {
         toast.success("Kode OTP berhasil dikirim! Silakan cek email/SMS Anda.");
         navigate("/reset-password", {
           state: { phone },
@@ -28,7 +28,7 @@ export const ForgotPasswordPage = () => {
         });
       } else {
         // Tampilkan error dari response API
-        const errorMessage = result.error || result.message || "Gagal mengirim OTP";
+        const errorMessage = result.error || "Gagal mengirim OTP";
         toast.error(errorMessage);
       }
     } catch (error: any) {

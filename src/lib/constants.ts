@@ -15,8 +15,8 @@ export const API_ENDPOINTS = {
   DECODE_TOKEN: 'supplier/decode_token',
   
   // Product endpoints
-  CREATE_PRODUCT: 'product/',
-  GET_PRODUCT: 'product/get', // /:productId
+  CREATE_PRODUCT: 'product/index_supplier',
+  GET_PRODUCT: 'product/get/', // /:productId
   SEARCH_PRODUCTS: 'product/search',
   PRODUCT_CATEGORIES: 'product/category',
   PRODUCT_CITY: 'product/city_product',
@@ -29,6 +29,9 @@ export const API_ENDPOINTS = {
   PROVINCES: 'city/get_province_rj',
   CITIES: 'city/get_city_rj/', // /:provinceId
   DISTRICTS: 'city/get_district_rj/', // /:cityId
+  // order
+  GET_ORDER: 'orders/index_supplier',
+  SET_NO_RESI: 'orders/set_awb/'
 } as const;
 
 export const TOKEN_KEY = '';

@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { useInitAuth } from './hooks/useInitAuth';
-import { ProtectedRoute, GuestRoute } from './components/RouteGuards';
+import { ProtectedRoute, GuestRoute, VerificationRoute, ResetPasswordRoute } from './components/RouteGuards';
 import { PageLoader } from './components/Loading';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -17,6 +17,8 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ de
 const ProductsPage = lazy(() => import('./pages/ProductsPage').then(m => ({ default: m.ProductsPage })));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
 const CreateProductPage = lazy(() => import('./pages/CreateProductPage').then(m => ({ default: m.CreateProductPage })));
+const OrdersPage = lazy(() => import('./pages/OrdersPage').then(m => ({ default: m.OrdersPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 
 // Create a client with optimized defaults
 const queryClient = new QueryClient({
@@ -59,9 +61,9 @@ function AppContent() {
         <Route
           path="/verification"
           element={
-            <GuestRoute>
+            <VerificationRoute>
               <VerificationPage />
-            </GuestRoute>
+            </VerificationRoute>
           }
         />
         <Route
@@ -75,9 +77,9 @@ function AppContent() {
         <Route
           path="/reset-password"
           element={
-            <GuestRoute>
+            <ResetPasswordRoute>
               <ResetPasswordPage />
-            </GuestRoute>
+            </ResetPasswordRoute>
           }
         />
 
@@ -119,6 +121,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <CreateProductPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

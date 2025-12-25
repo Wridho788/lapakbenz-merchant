@@ -7,6 +7,8 @@ import type { Product, ProductListResponse } from "../types/product.types";
 export const productApi = {
   // get all product
   getProducts: async (payload = {}) => {
+    const token = useAuthStore.getState().token;
+
     const defaultPayload = {
       limit: 30,
       offset: 0,
@@ -25,6 +27,7 @@ export const productApi = {
         {
           headers: {
             "Content-Type": "application/json",
+            "X-auth-token": token || "",
           },
         }
       );
@@ -36,9 +39,16 @@ export const productApi = {
   },
   // Get Product by ID
   getById: async (productId: string) => {
-    const url = `${API_ENDPOINTS.GET_PRODUCT}/${productId}`;
-    const response = await apiClient.get<{ success: boolean; data: Product }>(
-      url
+    const token = useAuthStore.getState().token;
+
+    const url = `${API_ENDPOINTS.GET_PRODUCT}${productId}`;
+    const response = await apiClient.get<{ success: boolean; content: Product }>(
+      url,
+      {
+        headers: {
+          "X-auth-token": token || "",
+        },
+      }
     );
     return response.data;
   },
@@ -82,36 +92,42 @@ export const productApi = {
   },
   // add product
   addProduct: async (productData: FormData) => {
-  const token = useAuthStore.getState().token;
+    const token = useAuthStore.getState().token;
 
-  const response = await apiClient.post(
-    API_ENDPOINTS.ADD_PRODUCT,
-    productData,
-    {
-      headers: {
-        "X-auth-token": token || "",
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-  return response.data;
-},
-// update product
-updateProduct: async ({ productId, data }: { productId: string; data: FormData }) => {
-  const token = useAuthStore.getState().token;
-
-  const response = await apiClient.post(
-    `${API_ENDPOINTS.UPDATE_PRODUCT}/${productId}`,
+    const response = await apiClient.post(
+      API_ENDPOINTS.ADD_PRODUCT,
+      productData,
+      {
+        headers: {
+          "X-auth-token": token || "",
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+  // update product
+  updateProduct: async ({
+    productId,
     data,
-    {
-      headers: {
-        "X-auth-token": token || "",
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-  return response.data;
-},
+  }: {
+    productId: string;
+    data: FormData;
+  }) => {
+    const token = useAuthStore.getState().token;
+
+    const response = await apiClient.post(
+      `${API_ENDPOINTS.UPDATE_PRODUCT}/${productId}`,
+      data,
+      {
+        headers: {
+          "X-auth-token": token || "",
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
 
   // add product image
   addProductImage: async (productId: string, imageData: any) => {
@@ -123,21 +139,18 @@ updateProduct: async ({ productId, data }: { productId: string; data: FormData }
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
+    return response;
   },
 
   // publish product
   publishProduct: async (productId: string) => {
     const token = useAuthStore.getState().token;
     const url = `${API_ENDPOINTS.PUBLISH_PRODUCT}${productId}`;
-    const response = await apiClient.get(
-      url,
-      {
-        headers: {
-          "X-auth-token": token || "",
-        },
-      }
-    );
+    const response = await apiClient.get(url, {
+      headers: {
+        "X-auth-token": token || "",
+      },
+    });
     return response.data;
   },
 
@@ -146,5 +159,5 @@ updateProduct: async ({ productId, data }: { productId: string; data: FormData }
     const url = `${API_ENDPOINTS.PRODUCT_CATEGORY}`;
     const response = await apiClient.get<{ success: boolean; data: any }>(url);
     return response.data;
-  }
+  },
 };

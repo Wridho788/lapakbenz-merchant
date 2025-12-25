@@ -38,7 +38,7 @@ export const CreateProductPage = () => {
     category: "",
     condition: "",
     qty: "",
-    shortdesc: "",
+    shortdescription: "",
     bestseller: "0",
     latest: "0",
     rating: "0",
@@ -49,15 +49,15 @@ export const CreateProductPage = () => {
     if (isEditMode && productData) {
       setFormData({
         name: productData.name || "",
-        price: productData.price || "",
+        price: productData.price?.toString() || "",
         category: productData.category || "",
         condition: productData.condition || "",
-        qty: productData.qty || "",
-        shortdesc: productData.shortdesc || "",
-        bestseller: productData.bestseller || "0",
-        latest: productData.latest || "0",
-        rating: productData.rating || "0",
-        weight: productData.weight || "",
+        qty: productData.qty?.toString() || "",
+        shortdescription: productData.shortdescription || "",
+        bestseller: productData.bestseller?.toString() || "0",
+        latest: productData.latest?.toString() || "0",
+        rating: productData.rating?.toString() || "0",
+        weight: productData.weight?.toString() || "",
       });
     }
   }, [isEditMode, productData]);
@@ -108,7 +108,7 @@ export const CreateProductPage = () => {
       data.append("category", formData.category);
       data.append("condition", formData.condition);
       data.append("qty", formData.qty);
-      data.append("shortdesc", formData.shortdesc);
+      data.append("shortdescription", formData.shortdescription);
 
       if (isEditMode) {
         data.append("bestseller", formData.bestseller);
@@ -224,7 +224,7 @@ export const CreateProductPage = () => {
       formData.category.trim() !== "" &&
       formData.condition.trim() !== "" &&
       formData.qty.trim() !== "" &&
-      formData.shortdesc.trim() !== "";
+      formData.shortdescription.trim() !== "";
 
     // Untuk add mode, gambar wajib ada
     if (!isEditMode) {
@@ -307,15 +307,15 @@ export const CreateProductPage = () => {
 
               <div>
                 <label
-                  htmlFor="shortdesc"
+                  htmlFor="shortdescription"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   Deskripsi Singkat *
                 </label>
                 <textarea
-                  id="shortdesc"
-                  name="shortdesc"
-                  value={formData.shortdesc}
+                  id="shortdescription"
+                  name="shortdescription"
+                  value={formData.shortdescription}
                   onChange={handleChange}
                   required
                   rows={4}
